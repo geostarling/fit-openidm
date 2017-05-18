@@ -1,13 +1,25 @@
 stages:
     - build
-build_and_test:
-    stage: build
-    image: alpine:3.5
-    tags:
-        - shared
-    script:
-        - mvn clean install
-    artifacts:
-        name: "${CI_BUILD_NAME}_${CI_BUILD_REF_NAME}"
-        paths:
-            - openidm-zip/target/openidm-*.zip
+
+before_script:
+  - apk add -U git openjdk8 maven
+  # Store local Maven repository inside project's dir to get it cached.
+  # https://gitlab.com/gitlab-org/gitlab-ce/issues/4431
+  - mkdir -p .m2 && ln -sf $(pwd)/.m2 ~/.m2
+cache:
+  key: project  # single cache per-project
+  paths: [ .m2 ]
+#==========  Stage build  ==========
+build:
+  image: alpine:3.5
+  script:
+    # Remove project's artifacts from local repository, just to be sure that
+    # they will not affect the build. Keep them in cache for tests.
+    - mvn build-helper:remove-project-artifact --batch-mode
+    # And finally build all modules.
+    - mvn install --batch-mode
+  artifacts:
+    paths:
+      - openidm-zip/target/openidm-*.zip
+    expire_in: 1 year
+  stage: build
