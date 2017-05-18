@@ -78,6 +78,22 @@
     <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
     <repositories>
         <repository>
+            <id>ext-release-local</id>
+            <name>FIT CVUT Ext Release Local</name>
+            <url>https://repository.fit.cvut.cz/maven/ext-release-local/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>ext-snapshot-local</id>
+            <name>FIT CVUT Ext Snapshot Local</name>
+            <url>https://repository.fit.cvut.cz/maven/ext-snapshot-local/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <!--<repository>
             <id>forgerock-staging-repository</id>
             <name>ForgeRock Release Repository</name>
             <url>http://maven.forgerock.org/repo/releases</url>
@@ -92,7 +108,7 @@
             <releases>
                 <enabled>false</enabled>
             </releases>
-        </repository>
+        </repository>-->
         <!--repository>
             <id>ops4j</id>
             <name>OPS4J Maven Repository</name>
