@@ -2,6 +2,7 @@ stages:
     - build
 build_and_test:
     stage: build
+    image: alpine:3.5
     tags:
         - shared
     script:
