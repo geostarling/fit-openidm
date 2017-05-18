@@ -3,7 +3,7 @@ stages:
 build_and_test:
     stage: build
     tags:
-        - x86_64
+        - shared
     script:
         - mvn clean install
     artifacts:
