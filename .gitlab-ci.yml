@@ -17,7 +17,7 @@ build:
     # they will not affect the build. Keep them in cache for tests.
     - mvn build-helper:remove-project-artifact --batch-mode
     # And finally build all modules.
-    - mvn install --batch-mode
+    - mvn install --batch-mode --projects "!openidm-repo-orientdb"
   artifacts:
     paths:
       - openidm-zip/target/openidm-*.zip
