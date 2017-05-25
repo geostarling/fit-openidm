@@ -1,5 +1,10 @@
 stages:
     - build
+    - deploy
+
+variables:
+  MVN_REPO_ID: cvut-libs-release-local
+  MVN_REPO_URL: https://repository.fit.cvut.cz/maven/libs-release-local/
 
 before_script:
   - apk add -U git openjdk8 maven
@@ -10,7 +15,6 @@ before_script:
          <settingsSecurity>
              <master>${MVN_MASTER_PWD}</master>
          </settingsSecurity>" > ~/.m2/settings-security.xml
-
   - echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
           <settings>
               <servers>
@@ -26,8 +30,6 @@ before_script:
                   </server>
               </servers>
           </settings>" > ~/.m2/settings.xml
-  - cat ~/.m2/settings.xml
-  - cat ~/.m2/settings-security.xml
 
 cache:
   key: project  # single cache per-project
@@ -41,8 +43,11 @@ build:
     - mvn build-helper:remove-project-artifact --batch-mode
     # And finally build all modules.
     - mvn install --batch-mode --projects "!openidm-repo-orientdb"
-  artifacts:
-    paths:
-      - openidm-zip/target/openidm-*.zip
-    expire_in: 1 year
   stage: build
+
+deploy:
+  script:
+    - mvn deploy -DaltDeploymentRepository=${MVN_REPO_ID}::default::${MVN_REPO_URL} --projects "!openidm-repo-orientdb"
+#  only:
+#    - fit/master
+  stage: deploy
