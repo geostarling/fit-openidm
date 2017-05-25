@@ -46,6 +46,7 @@ build:
   stage: build
 
 deploy:
+  image: alpine:3.5
   script:
     - mvn deploy -DaltDeploymentRepository=${MVN_REPO_ID}::default::${MVN_REPO_URL} --projects "!openidm-repo-orientdb"
 #  only:
