@@ -796,8 +796,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             }
             ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
 
+            JsonValue oldValue = readResponse.getContent();
+
+            // Populate the relationship fields in the read resource
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
+            oldValue.asMap().putAll(relationships.asMap());
+
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
-            		readResponse.getContent(), request.getContent(), relationshipProviders.keySet());
+            		oldValue, request.getContent(), relationshipProviders.keySet());
             
             activityLogger.log(managedContext, request, "update", managedId(readResponse.getId()).toString(),
                     readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
