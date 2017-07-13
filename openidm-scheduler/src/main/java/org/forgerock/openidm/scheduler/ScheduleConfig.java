@@ -52,9 +52,15 @@ public class ScheduleConfig {
     public ScheduleConfig(JsonValue config) throws ResourceException {
         JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
         if (enabledValue.isString()) {
-            enabled = Boolean.parseBoolean(enabledValue.defaultTo("true").asString());
+            String enabledValueStr = enabledValue.defaultTo("true").asString();
+            if (!"true".equals(enabledValueStr) && !"false".equals(enabledValueStr)) {
+                throw new BadRequestException("Invalid scheduler configuration, the"
+                        + " \"enabled\" property must be set to one of the following values: (true|false). "
+                        + "Complete config:" + config);
+            }
+            enabled = Boolean.parseBoolean(enabledValueStr);
         } else {
-            enabled = enabledValue.defaultTo(Boolean.TRUE).asBoolean();
+            enabled = enabledValue.expect(Boolean.class).defaultTo(Boolean.TRUE).asBoolean();
         }
         JsonValue persistedValue = config.get(SchedulerService.SCHEDULE_PERSISTED);
         if (persistedValue.isString()) {
