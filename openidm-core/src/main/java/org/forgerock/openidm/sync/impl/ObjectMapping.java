@@ -290,7 +290,19 @@ class ObjectMapping {
         taskThreads = config.get("taskThreads").defaultTo(DEFAULT_TASK_THREADS).asInteger();
         feedSize = config.get("feedSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
-        syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
+
+        JsonValue enableSyncValue = config.get("enableSync");
+        if (enableSyncValue.isString()) {
+            String enableSyncValueStr = enableSyncValue.defaultTo("true").asString();
+            if (!"true".equals(enableSyncValueStr) && !"false".equals(enableSyncValueStr)) {
+                LOGGER.error("Invalid mapping configuration. Parameter \"enableSync\" is not one of the following values (true|false). Got value: {}", enableSyncValueStr);
+                throw new JsonValueException(config, "Invalid mapping configuration. Parameter \"enableSync\" is not one of the following values (true|false).");
+            }
+            syncEnabled = Boolean.parseBoolean(enableSyncValueStr);
+        } else {
+            syncEnabled = enableSyncValue.expect(Boolean.class).defaultTo(Boolean.TRUE).asBoolean();
+        }
+
         linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
         reconSourceQueryPaging = config.get("reconSourceQueryPaging").defaultTo(false).asBoolean();
         reconSourceQueryPageSize = config.get("reconSourceQueryPageSize")
