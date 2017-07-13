@@ -177,6 +177,22 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </pluginRepository>
+        <pluginRepository>
+            <id>ext-release-local</id>
+            <name>FIT CVUT Ext Release Local</name>
+            <url>https://repository.fit.cvut.cz/maven/ext-release-local/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>ext-snapshot-local</id>
+            <name>FIT CVUT Ext Snapshot Local</name>
+            <url>https://repository.fit.cvut.cz/maven/ext-snapshot-local/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
     </pluginRepositories>
 
     <mailingLists>
