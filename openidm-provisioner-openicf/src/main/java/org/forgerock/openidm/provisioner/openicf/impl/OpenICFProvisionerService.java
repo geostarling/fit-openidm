@@ -322,7 +322,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             jsonConfiguration = enhancedConfig.getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
 
-            if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {
+            JsonValue enabledValue = jsonConfiguration.get("enabled");
+            boolean enabled;
+            if (enabledValue.isString()) {
+                String enabledValueStr = enabledValue.defaultTo("true").asString();
+                if (!"true".equals(enabledValueStr) && !"false".equals(enabledValueStr)) {
+                    logger.error("OpenICF connector jsonConfiguration of {} has errors. Parameter \"enabled\" is not one of the following values (true|false).",
+                            systemIdentifier.getName());
+                    throw new ComponentException(
+                            "OpenICF connector jsonConfiguration has errors and the service can not be initiated.");
+                }
+                enabled = Boolean.parseBoolean(enabledValueStr);
+            } else {
+                enabled = enabledValue.expect(Boolean.class).defaultTo(Boolean.TRUE).asBoolean();
+            }
+
+            if (!enabled) {
                 logger.info("OpenICF Provisioner Service {} is disabled, \"enabled\" set to false in configuration",
                         systemIdentifier.getName());
                 return;
