@@ -647,10 +647,9 @@
                                     <artifactId>orientdb-community</artifactId>
                                     <version>${orientdb.studio.version}</version>
                                     <type>zip</type>
-                                    <classifier>distribution</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <includes>**/www/**,**/plugins/studio-*.zip</includes>
+                                    <includes>**/www/**,**/plugins/orientdb-studio-*.zip</includes>
                                 </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>

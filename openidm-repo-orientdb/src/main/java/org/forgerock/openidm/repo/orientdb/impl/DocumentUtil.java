@@ -25,6 +25,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.ORecordInternal;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import java.util.ArrayList;
@@ -262,7 +263,7 @@ public class DocumentUtil  {
      * @return the converted orientdb document, or null if objModel was null
      * @throws ConflictException when the revision in the Object model is invalid
      */
-    protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass, boolean patch, 
+    protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass, boolean patch,
             boolean topLevel) throws ConflictException {
         
         ODocument result = null;
@@ -282,7 +283,7 @@ public class DocumentUtil  {
                     }
                     for (String entry : removalList) {
                         logger.trace("Removing entry {} ", entry);
-                        result.removeField(entry);
+                        result.removeField(escapeFieldName(entry));
                     }
                 }
             }
@@ -300,7 +301,7 @@ public class DocumentUtil  {
                         }
                     } else {
                         logger.trace("Setting field {} to value {}", key, value);
-                        result.field(entry.getKey(), value);
+                        result.field(escapeFieldName(entry.getKey()), value);
                     }
                 } else if (key.equals(TAG_REV)) {
                     // OpenIDM revision to document version mapping
@@ -310,12 +311,12 @@ public class DocumentUtil  {
                             int rev = parseVersion(revString);
                             logger.trace("Setting version to {}", rev);
                             if (result.getVersion() != rev) {
-                                result.setVersion(rev);
+                                ORecordInternal.setVersion(result, rev);
                             }
                         }
                     } else {
                         logger.trace("Setting field {} to value {}", key, value);
-                        result.field(entry.getKey(), value);
+                        result.field(escapeFieldName(entry.getKey()), value);
                     }
                 } else if (value instanceof Map) {
                     // TODO: consider if we should replace this with nested maps rather than nested ODocuments
@@ -323,11 +324,11 @@ public class DocumentUtil  {
                     ODocument existingDoc = null;
                     if (docToPopulate != null) {
                         logger.trace("Update existing embedded map entry {}", key);
-                        Object o = docToPopulate.field(entry.getKey());
+                        Object o = docToPopulate.field(escapeFieldName(entry.getKey()));
                         if (o instanceof ODocument) {
                             existingDoc = (ODocument) o;
                         } else {
-                            docToPopulate.removeField(entry.getKey());
+                            docToPopulate.removeField(escapeFieldName(entry.getKey()));
                         }
                     }
                     // TODO: below is temporary work-around for OrientDB update not saving embedded ODocument,
@@ -337,14 +338,41 @@ public class DocumentUtil  {
                     existingDoc = new ODocument(); 
                     //} 
                     ODocument converted = toDocument(json(value).asMap(), existingDoc, db, null, patch, false);
-                    result.field(entry.getKey(), converted, OType.EMBEDDED);
+                    result.field(escapeFieldName(entry.getKey()), converted, OType.EMBEDDED);
                 } else {
-                    logger.trace("Setting field {} to value {}", key, value);
-                    result.field(entry.getKey(), value);
+                    String fieldName = escapeFieldName(entry.getKey());
+                    logger.trace("Setting field {} to value {}", fieldName, value);
+                    result.field(escapeFieldName(fieldName), value);
                 }
             }
         }
 
+        return result;
+    }
+
+    private static String strToHex(String str) {
+        String result = "";
+        for (int idx = 0; idx < str.length(); idx++) {
+            result += "0x" + Integer.toHexString(Character.codePointAt(str, idx));
+        }
+        return result;
+    }
+
+    public static String escapeFieldName(String fieldName) {
+        String[] forbiddenSeqs = new String[]{".", "["};
+        String result = fieldName;
+        for (String seq : forbiddenSeqs) {
+            result = result.replace(seq, strToHex(seq));
+        }
+        return result;
+    }
+
+    public static String unescapeFieldName(String fieldName) {
+        String[] forbiddenSeqs = new String[]{".", "["};
+        String result = fieldName;
+        for (String seq : forbiddenSeqs) {
+            result = result.replace(strToHex(seq), seq);
+        }
         return result;
     }
 

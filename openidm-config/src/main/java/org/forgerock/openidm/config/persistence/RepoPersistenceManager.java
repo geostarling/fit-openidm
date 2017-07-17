@@ -74,6 +74,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
 
     private static final String BUNDLE_LOCATION = "service__bundleLocation";
     private static final String FELIX_FILEINSTALL_FILENAME = "felix__fileinstall__filename";
+    private static final String FACTORY_PID = "factory__pid";
 
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
 
@@ -347,6 +348,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 } catch (NotFoundException ex) {
                     // Just detect that it doesn't exist
                 }
+                obj.remove(RepoPersistenceManager.FACTORY_PID); // cannot persist factory PID in orientdb since it has type TargetID
                 if (existing != null) {
                     String rev = (String) existing.get("_rev");
 
