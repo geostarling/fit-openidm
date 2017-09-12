@@ -42,7 +42,7 @@ build:
     # they will not affect the build. Keep them in cache for tests.
     - mvn build-helper:remove-project-artifact --batch-mode
     # And finally build all modules.
-    - mvn install --batch-mode --projects
+    - mvn install --batch-mode
   stage: build
 
 deploy:
